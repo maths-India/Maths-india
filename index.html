@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12332B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Speed Math – अंकगणित</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF2E8;--ink:#12332B;--card:#fff;--line:#c5d0bf;--acc:#E0A800;--ok:#1E8E5A;--bad:#D64933;--mut:#587068;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c211b;--ink:#EEF2E8;--card:#173d33;--line:#2d5a4d;--acc:#F4D35E;--ok:#4cc38a;--bad:#ff7a63;--mut:#9db8ae}}
+:root[data-theme="dark"]{--bg:#0c211b;--ink:#EEF2E8;--card:#173d33;--line:#2d5a4d;--acc:#F4D35E;--ok:#4cc38a;--bad:#ff7a63;--mut:#9db8ae}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Mukta',system-ui,sans-serif;font-size:17px;line-height:1.4}
+main{max-width:480px;margin:0 auto;padding:20px 18px 40px}
+[hidden]{display:none!important}
+h1{font-size:34px;font-weight:800;margin:8px 0 2px;line-height:1.1}
+.sub{color:var(--mut);margin:0 0 20px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.topic{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}
+.topic b{font-size:19px;font-weight:600;display:block}
+.topic span{color:var(--mut);font-size:15px}
+.topic em{font-style:normal;font-weight:800;color:var(--ok)}
+.hud{display:flex;justify-content:space-between;color:var(--mut);font-weight:600;margin-bottom:8px}
+.board{background:#12332B;color:#F1F4EC;border-radius:16px;padding:26px 18px 22px;text-align:center;border:1px solid var(--line)}
+#q{font-size:clamp(30px,9vw,42px);font-weight:800;line-height:1.2;min-height:100px;display:flex;align-items:center;justify-content:center}
+.bar{height:8px;background:#2d5a4d;border-radius:4px;overflow:hidden;margin-top:14px}
+#bar{height:100%;width:100%;background:#F4D35E}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.opt{min-height:68px;font-size:24px;font-weight:600;background:var(--card);border:2px solid var(--line);border-radius:12px}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+#fb{min-height:28px;text-align:center;font-weight:600;margin-top:12px;color:var(--bad)}
+.big{font-size:64px;font-weight:800;line-height:1;margin:6px 0}
+.row{display:flex;gap:10px;margin:18px 0}
+.btn{flex:1;padding:14px;border-radius:12px;border:2px solid var(--ink);background:transparent;font-weight:600}
+.btn.main{background:var(--ink);color:var(--bg)}
+.rev{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<main>
+<section id="home">
+  <h1>Speed Math<br>अंकगणित</h1>
+  <p class="sub">10 questions, 15 seconds each. Practice for Police Bharti and MPSC.</p>
+  <div id="topics"></div>
+</section>
+
+<section id="quiz" hidden>
+  <div class="hud"><span>Question <span id="qn"></span></span><span>Streak <span id="st">0</span></span><span>Score <span id="sc">0</span></span></div>
+  <div class="board"><div id="q"></div><div class="bar"><div id="bar"></div></div></div>
+  <div class="opts" id="opts"></div>
+  <div id="fb" aria-live="polite"></div>
+</section>
+
+<section id="result" hidden>
+  <p class="sub" id="tn"></p>
+  <div class="big" id="fs"></div>
+  <p id="cr"></p>
+  <p id="msg" style="font-weight:600"></p>
+  <div id="rev"></div>
+  <div class="row"><button class="btn" id="back">Change topic</button><button class="btn main" id="again">Play again</button></div>
+</section>
+</main>
+
+<script>
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a, P=a=>a[R(0,a.length-1)];
+const T={
+ pct:{n:'Percentage',d:'% of a number',g(){const p=P([5,10,15,20,25,30,40,50,60,75]),n=P([40,60,80,120,160,200,240,280,320,400,480]);return[`${p}% of ${n} = ?`,p*n/100]}},
+ pl:{n:'Profit and Loss',d:'Selling price from cost price',g(){const cp=P([200,400,500,600,800,1200,1500,2000]),p=P([5,10,15,20,25]),w=P(['profit','loss']);return[`Cost ₹${cp}, ${p}% ${w}. Selling price = ?`,cp*(100+(w==='profit'?p:-p))/100]}},
+ avg:{n:'Average',d:'Mean of five numbers',g(){const a=R(40,90),o=[R(-9,9),R(-9,9),R(-9,9),R(-9,9)];o.push(-o.reduce((x,y)=>x+y));return[`Average of ${o.map(x=>a+x).join(', ')} = ?`,a]}},
+ sq:{n:'Squares and cubes',d:'11–35 squares, 2–15 cubes',g(){if(R(0,2)){const n=R(11,35);return[`${n}² = ?`,n*n]}const n=R(2,15);return[`${n}³ = ?`,n*n*n]}},
+ tab:{n:'Tables',d:'11–25 tables',g(){const a=R(11,25),b=R(3,12);return[`${a} × ${b} = ?`,a*b]}},
+ mix:{n:'Mixed test',d:'All topics together'}
+};
+const keys=['pct','pl','avg','sq','tab'];
+function opts(a){const s=new Set([a]);while(s.size<4){const d=P([-1,1])*R(1,Math.max(3,Math.round(a*0.12)));if(a+d>0)s.add(a+d)}return[...s].sort(()=>Math.random()-.5)}
+const $=id=>document.getElementById(id);
+function show(id){['home','quiz','result'].forEach(s=>$(s).hidden=s!==id)}
+function best(){try{return JSON.parse(localStorage.getItem('sm_best')||'{}')}catch(e){return{}}}
+function saveBest(t,s){try{const b=best();if(!b[t]||s>b[t]){b[t]=s;localStorage.setItem('sm_best',JSON.stringify(b));return true}}catch(e){}return false}
+
+function home(){
+  const b=best();
+  $('topics').innerHTML=Object.keys(T).map(k=>`<button class="topic" data-k="${k}"><div><b>${T[k].n}</b><span>${T[k].d}</span></div>${b[k]?`<em>Best ${b[k]}</em>`:''}</button>`).join('');
+  $('topics').querySelectorAll('.topic').forEach(e=>e.onclick=()=>start(e.dataset.k));
+  show('home');
+}
+let topic,qs,i,score,streak,wrong,tl,timer,locked;
+function start(t){
+  topic=t;qs=[];const seen=new Set();
+  while(qs.length<10){const k=t==='mix'?P(keys):t;const[q,a]=T[k].g();if(!seen.has(q)){seen.add(q);qs.push({q,a,o:opts(a)})}}
+  i=0;score=0;streak=0;wrong=[];show('quiz');next();
+}
+function hud(){$('st').textContent=streak;$('sc').textContent=score}
+function next(){
+  if(i>=10)return finish();
+  locked=false;const x=qs[i];
+  $('qn').textContent=`${i+1}/10`;$('q').textContent=x.q;$('fb').textContent='';hud();
+  $('opts').innerHTML=x.o.map(v=>`<button class="opt" data-v="${v}">${v}</button>`).join('');
+  $('opts').querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(Number(b.dataset.v),b));
+  tl=15;$('bar').style.width='100%';clearInterval(timer);
+  timer=setInterval(()=>{tl-=.1;$('bar').style.width=Math.max(tl/15*100,0)+'%';if(tl<=0)pick(null,null)},100);
+}
+function pick(v,btn){
+  if(locked)return;locked=true;clearInterval(timer);
+  const x=qs[i],ok=v===x.a;
+  if(ok){streak++;score+=10+Math.ceil(tl)}else{streak=0;wrong.push(x);$('fb').textContent=v===null?'Time’s up. Correct answer: '+x.a:'Wrong. Correct answer: '+x.a}
+  $('opts').querySelectorAll('.opt').forEach(b=>{if(Number(b.dataset.v)===x.a)b.classList.add('ok');else if(b===btn)b.classList.add('bad')});
+  hud();i++;setTimeout(next,ok?600:1500);
+}
+function finish(){
+  const c=10-wrong.length,nb=saveBest(topic,score);
+  $('tn').textContent=T[topic].n;$('fs').textContent=score;
+  $('cr').textContent=`${c} of 10 correct`+(nb?' · New best score':'');
+  $('msg').textContent=c>=9?'Exam-ready. Try Mixed test next.':c>=6?'Good. Practise this topic once more.':'Revise this topic and play again.';
+  $('rev').innerHTML=wrong.map(w=>`<div class="rev"><span>${w.q}</span><b>${w.a}</b></div>`).join('');
+  show('result');
+}
+$('again').onclick=()=>start(topic);
+$('back').onclick=home;
+home();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+</script>
+</body>
+</html>
